@@ -1,14 +1,20 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import Koa from "koa";
-import type { Context } from "koa";
 import Router from "@koa/router";
 import serve from "koa-static";
+import type { Context } from "koa";
 import { urlAlphabet, customAlphabet } from "nanoid";
+
+const port = process.env.PORT || 3000;
 
 const app = new Koa();
 const router = new Router();
 
 interface link {
     readonly slug: string;
+
     readonly url: string;
 }
 
@@ -52,4 +58,4 @@ router.post("/shorten", async (ctx: Context) => {
     ctx.body = `${ctx.request.URL.origin}/${id}`;
 });
 
-app.use(router.routes()).listen(3000);
+app.use(router.routes()).listen(port);
