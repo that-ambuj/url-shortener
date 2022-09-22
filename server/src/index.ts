@@ -2,9 +2,13 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import Koa from "koa";
+import type { Context } from "koa";
+
 import Router from "@koa/router";
 import serve from "koa-static";
-import type { Context } from "koa";
+
+import logger from "koa-logger";
+
 import { urlAlphabet, customAlphabet } from "nanoid";
 
 const port = process.env.PORT || 3000;
@@ -12,15 +16,30 @@ const port = process.env.PORT || 3000;
 const app = new Koa();
 const router = new Router();
 
+if (process.env.NODE_ENV === "development") {
+    app.use(logger());
+}
+
 interface link {
     readonly slug: string;
-
     readonly url: string;
 }
 
 const links: link[] = [{ slug: "ggoodale", url: "https://www.google.com" }];
 
 const nanoid = customAlphabet(urlAlphabet, 12);
+
+app.use(async (ctx, next) => {
+    try {
+        await next();
+    } catch (err) {
+        // @ts-ignore
+        ctx.status = err?.status || 500;
+        ctx.body = "Something leaked! We'll fix the pipes";
+
+        ctx.app.emit("error", err, ctx);
+    }
+});
 
 app.use(serve("../frontend/dist/"));
 
@@ -56,6 +75,10 @@ router.post("/shorten", async (ctx: Context) => {
 
     links.push({ slug: id, url: url });
     ctx.body = `${ctx.request.URL.origin}/${id}`;
+});
+
+app.on("error", (err, ctx) => {
+    console.error("Server Error : ", err, ctx);
 });
 
 app.use(router.routes()).listen(port);
