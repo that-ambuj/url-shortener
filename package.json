@@ -1,0 +1,19 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "A personal project of mine, which is a basic url shortener made with Vue, Vite and Koa in typescript.",
+  "repository": "https://github.com/that-ambuj/url-shortener",
+  "author": "Ambuj Singh",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "server"
+  ],
+  "scripts": {
+    "build": "yarn --cwd server build && yarn --cwd frontend build",
+    "start": "yarn --cwd server start",
+    "build:start": "yarn build && yarn start",
+    "dev": "yarn --cwd server dev & yarn --cwd frontend dev"
+  }
+}

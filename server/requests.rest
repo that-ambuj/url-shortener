@@ -1,0 +1,10 @@
+GET http://localhost:3000/ HTTP/1.1
+
+###
+POST http://localhost:3000/shorten?url=https://beta.reactjs.org HTTP/1.1
+
+###
+GET http://localhost:3000/O0ULXpKWPr5Uu97p HTTP/1.1
+
+###
+GET http://localhost:3000/ggoodale HTTP/1.1
