@@ -6,36 +6,52 @@ import type { Context } from "koa";
 
 import Router from "@koa/router";
 import serve from "koa-static";
-
 import logger from "koa-logger";
-
-import { urlAlphabet, customAlphabet } from "nanoid";
+import { customAlphabet } from "nanoid";
 
 const port = process.env.PORT || 3000;
 
 const app = new Koa();
 const router = new Router();
 
+let id = 0;
+
 if (process.env.NODE_ENV === "development") {
     app.use(logger());
+    app.use(async (ctx, next) => {
+        ctx.response.set(
+            "Access-Control-Allow-Origin",
+            "http://localhost:5173"
+        );
+        ctx.response.set(
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept"
+        );
+        await next();
+    });
 }
 
 interface link {
+    readonly id: number;
     readonly slug: string;
     readonly url: string;
 }
 
-const links: link[] = [{ slug: "ggoodale", url: "https://www.google.com" }];
+const links: link[] = [
+    { id: 1, slug: "ggoodale", url: "https://www.google.com" },
+];
 
-const nanoid = customAlphabet(urlAlphabet, 12);
+const nanoid = customAlphabet(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+    10
+);
 
 app.use(async (ctx, next) => {
     try {
         await next();
     } catch (err) {
-        // @ts-ignore
-        ctx.status = err?.status || 500;
-        ctx.body = "Something leaked! We'll fix the pipes";
+        ctx.status = 500;
+        ctx.body = "Oops! Something doesn't look right.";
 
         ctx.app.emit("error", err, ctx);
     }
@@ -71,10 +87,10 @@ router.post("/shorten", async (ctx: Context) => {
         return;
     }
 
-    const id = nanoid();
+    const slug = nanoid();
 
-    links.push({ slug: id, url: url });
-    ctx.body = `${ctx.request.URL.origin}/${id}`;
+    links.push({ id: id++, slug: slug, url: url });
+    ctx.body = `${ctx.request.URL.origin}/${slug}`;
 });
 
 app.on("error", (err, ctx) => {
