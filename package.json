@@ -14,6 +14,7 @@
     "build": "yarn --cwd server build && yarn --cwd frontend build",
     "start": "yarn --cwd server start",
     "build:start": "yarn build && yarn start",
-    "dev": "yarn --cwd server dev & yarn --cwd frontend dev"
+    "dev": "yarn --cwd server dev & yarn --cwd frontend dev",
+    "clean": "yarn --cwd server clean && yarn --cwd frontend clean"
   }
 }

@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "build": "yarn clean && vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "clean": "rm -rf dist/"
   },
   "dependencies": {
     "@formkit/auto-animate": "^1.0.0-beta.3",
