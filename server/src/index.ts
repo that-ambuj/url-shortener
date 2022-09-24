@@ -13,7 +13,7 @@ import { PrismaClient } from "@prisma/client";
 import type { Link } from "@prisma/client";
 const prisma = new PrismaClient();
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const app = new Koa();
 const router = new Router();
