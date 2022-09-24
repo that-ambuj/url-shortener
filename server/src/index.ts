@@ -9,7 +9,11 @@ import serve from "koa-static";
 import logger from "koa-logger";
 import { customAlphabet } from "nanoid";
 
-const port = process.env.PORT || 3000;
+import { PrismaClient } from "@prisma/client";
+import type { Link } from "@prisma/client";
+const prisma = new PrismaClient();
+
+const port = 3000;
 
 const app = new Koa();
 const router = new Router();
@@ -31,16 +35,6 @@ if (process.env.NODE_ENV === "development") {
     });
 }
 
-interface link {
-    readonly id: number;
-    readonly slug: string;
-    readonly url: string;
-}
-
-const links: link[] = [
-    { id: 1, slug: "ggoodale", url: "https://www.google.com" },
-];
-
 const nanoid = customAlphabet(
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
     10
@@ -61,14 +55,15 @@ app.use(serve("../frontend/dist/"));
 
 router.get("/:slug", async (ctx: Context) => {
     const slug = ctx.params.slug;
-    // @ts-ignore
-    const correctLink: link = links.find((l) => l.slug === slug);
-    if (correctLink === undefined) {
+    const correctLink: Link | null = await prisma.link.findUnique({
+        where: { slug },
+    });
+    if (correctLink === null) {
         ctx.status = 404;
         ctx.body = "Wrong Url Identifier";
         return;
     }
-    ctx.redirect(correctLink?.url);
+    ctx.redirect(correctLink?.target);
 });
 
 router.post("/shorten", async (ctx: Context) => {
@@ -89,7 +84,7 @@ router.post("/shorten", async (ctx: Context) => {
 
     const slug = nanoid();
 
-    links.push({ id: id++, slug: slug, url: url });
+    await prisma.link.create({ data: { slug: slug, target: url } });
     ctx.body = `${ctx.request.URL.origin}/${slug}`;
 });
 
