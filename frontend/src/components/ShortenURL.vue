@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import type { Ref } from "vue";
-import axios from "axios";
+
+const baseURL = "http://localhost:3000";
 
 interface link {
     id: number;
@@ -17,25 +18,21 @@ const generatedURLs: Ref<link[]> = ref([]);
 const lastURL: Ref<string> = ref("");
 
 async function generateUrl(): Promise<void> {
-    const res = await axios.post(
-        `http://localhost:3000/shorten?url=${targetURL.value}`
-    );
+    const res = await fetch(`${baseURL}/shorten?url=${targetURL.value}`, {
+        method: "POST",
+    });
 
-    if (res.status !== 200) {
-        console.log(res.data);
+    if (!res.ok) {
+        console.log(res.status, " ", res.json());
         return;
     }
 
-    generatedURLs.value.push({
-        id: id++,
-        mask: res.data.toString(),
-        target: targetURL.value,
-    });
+    const responseObj = await res.json();
 
-    setGeneratedLinks(generatedURLs.value);
+    generatedURLs.value.push(responseObj);
 
     targetURL.value = "https://";
-    lastURL.value = res.data;
+    lastURL.value = responseObj.mask;
 
     copyToClipboard(lastURL.value?.toString());
 }
@@ -56,7 +53,14 @@ function getGeneratedLinks(): link[] {
     return JSON.parse(links);
 }
 
-function removeURL(link: link): void {
+async function deleteURL(link: link): Promise<void> {
+    const res = await fetch(`${baseURL}/delete?id=${link.id}`, {
+        method: "DELETE",
+    });
+    if (!res.ok) {
+        // TODO handle error
+        return;
+    }
     generatedURLs.value = generatedURLs.value.filter((l) => l !== link);
 }
 
@@ -101,7 +105,7 @@ onUnmounted(() => {
                     <div id="heading">{{ url.mask }}</div>
                     <div>{{ url.target }}</div>
                 </div>
-                <button @click="removeURL(url)">Delete</button>
+                <button @click="deleteURL(url)">Delete</button>
             </li>
         </ul>
     </div>
