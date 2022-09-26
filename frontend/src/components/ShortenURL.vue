@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import type { Ref } from "vue";
 
-const baseURL = "http://localhost:3000";
+const baseURL = "http://localhost:3000/api";
 
 interface link {
     id: number;
@@ -14,27 +14,42 @@ let id = 0;
 
 const targetURL: Ref<string> = ref("https://");
 const generatedURLs: Ref<link[]> = ref([]);
+const copyBtnText: Ref<string> = ref("Copy");
 
 const lastURL: Ref<string> = ref("");
 
 async function generateUrl(): Promise<void> {
-    const res = await fetch(`${baseURL}/shorten?url=${targetURL.value}`, {
+    const res = await fetch(`${baseURL}/shorten`, {
         method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: targetURL.value }),
     });
 
     if (!res.ok) {
-        console.log(res.status, " ", res.json());
+        console.log(res.status);
         return;
     }
 
     const responseObj = await res.json();
 
     generatedURLs.value.push(responseObj);
+    setGeneratedLinks(generatedURLs.value);
 
     targetURL.value = "https://";
     lastURL.value = responseObj.mask;
 
-    copyToClipboard(lastURL.value?.toString());
+    navigator.clipboard.writeText(lastURL.value?.toString());
+}
+
+function copyMainURL(): void {
+    navigator.clipboard.writeText(lastURL.value);
+    copyBtnText.value = "Done!";
+
+    setTimeout(() => {
+        copyBtnText.value = "Copy";
+    }, 5000);
 }
 
 function copyToClipboard(string: string): void {
@@ -62,6 +77,7 @@ async function deleteURL(link: link): Promise<void> {
         return;
     }
     generatedURLs.value = generatedURLs.value.filter((l) => l !== link);
+    setGeneratedLinks(generatedURLs.value);
 }
 
 onMounted(() => {
@@ -92,10 +108,14 @@ onUnmounted(() => {
         />
         <button class="btn">Shorten!</button>
     </form>
-    <div v-auto-animate v-if="lastURL !== ''" id="result">
+    <div v-auto-animate v-if="lastURL !== ''" class="flex-center">
         <div>The below url is already copied to your clipboard!</div>
-        {{ lastURL }}
-        <button id="copy" @click="copyToClipboard(lastURL)">Copy</button>
+        <div id="result">
+            {{ lastURL }}
+            <button id="copy" @click="copyMainURL">
+                {{ copyBtnText }}
+            </button>
+        </div>
     </div>
     <div v-if="generatedURLs.length !== 0">
         <h2>Your Generated URLs</h2>
@@ -105,10 +125,13 @@ onUnmounted(() => {
                     <div id="heading">{{ url.mask }}</div>
                     <div>{{ url.target }}</div>
                 </div>
-                <button @click="deleteURL(url)">Delete</button>
+                <div class="buttons">
+                    <button id="blue" @click="copyToClipboard(url.mask)">
+                        Copy
+                    </button>
+                    <button id="delete" @click="deleteURL(url)">Delete</button>
+                </div>
             </li>
         </ul>
     </div>
 </template>
-
-<style lang="scss"></style>
