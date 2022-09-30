@@ -24,3 +24,4 @@ The backend will serve static build files on localhost:3000, and the api on /api
 - [Koa.js](https://koajs.dev) - Koa is a minimal backend framework which is way faster than express and has concise syntax.
 - [Prisma ORM](https://prisma.io) - Prisma a typesafe ORM mainly for SQL databases and I really like it typesafety when working with sql databases.
 - [Sqlite3](https://sqlite.org) - I'm using sqlite3 file-based sql database suitable for small to mid size projects. Using postgresql in a hobby project would have been overkill.
+- [Yarn and Yarn workspaces](https://yarnpkg.org) - A package manager and project manager that helped me put both the frontend and the backend in a monorepo for easy developement.
