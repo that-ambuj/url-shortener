@@ -12,12 +12,12 @@ yarn
 ```bash
 yarn dev
 ```
-The frontend will on visible localhost:5713 in your browser and backend will be on localhost:3000/api.
+The frontend will on visible `http://localhost:5713` in your browser and backend will be on `http://localhost:3000/api`.
 #### Using the production build
 ```bash
 yarn build:start
 ```
-The backend will serve static build files on localhost:3000, and the api on /api endpoint.
+The backend will serve static build files on `https://localhost:3000`, and the api on /api endpoint.
 
 ## Tech Stack used :
 - [Vue](https://vuejs.org) - Vue is a frontend framework I really became a fan of. I love it's typescript support and combination of speed with [Vite.js](https://vitejs.dev).
